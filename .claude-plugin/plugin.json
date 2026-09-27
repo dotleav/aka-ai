@@ -1,0 +1,5 @@
+{
+  "name": "aka-ai-plugin",
+  "version": "2.0.0",
+  "description": "Kumpulan skill Claude Code untuk kebutuhan mahasiswa kedokteran: Asisten tutor PBL, pembuatan bank soal (soalin), tabel kasus scenario Clinical Reasoning (tabel-cr), konversi PDF/foto ke markdown (softfiler), dan rapikan transkrip kuliah (transkrip)."
+}

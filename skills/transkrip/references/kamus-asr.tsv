@@ -1,0 +1,26 @@
+# Kamus koreksi ASR otomatis (regex<TAB>pengganti). Hanya entri aman/tidak ambigu. Tambah sesuai domain.
+mantum tes|mantuk tes|mantok tes	Mantoux tes
+rosiella infantum	roseola infantum
+hemofilus|hemofilis	Haemophilus
+kipi(nya)?	KIPI\1
+heksasim	Hexaxim
+tetraksim	Tetraxim
+rotarik	Rotarix
+rotatek	RotaTeq
+bostrik	Boostrix
+corine bakterium	Corynebacterium
+bordetela pertusis	Bordetella pertussis
+mikobacterium	Mycobacterium
+vekal[- ]oral|fekal oral	fekal-oral
+misseles	measles
+drubella	rubella
+farisel+a|varisel+a	varisela
+poliomialitis|poliomelisitis	poliomielitis
+enfalitis|ensalit(?:is)?	ensefalitis
+pertusit	pertusis
+toksetanus|toks tetanus|toxoetanus	toksoid tetanus
+imunoglobin	imunoglobulin
+imunasi|imunsasi	imunisasi
+intraakutan|inakutan	intrakutan
+intramuskuler	intramuskular
+biofarma	Biofarma
