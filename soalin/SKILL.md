@@ -11,7 +11,7 @@ description: >
   (7) create or triage short-answer/essay ("isian") recall questions that don't fit MCQ.
   Trigger on: "soalin", "quiz bank", "soal UB", "soal ujian", "buat soal", "convert soal",
   "kunci jawaban", "penjelasan", "crop gambar", "distribusi jawaban", "soal isian", "essay",
-  "jawaban singkat", any .docx quiz file, or medical MCQ with Indonesian anatomy/physiology.
+  "jawaban singkat", "soal minites", any .docx quiz file, or medical MCQ with Indonesian anatomy/physiology.
 ---
 
 # Soalin
@@ -29,8 +29,11 @@ Read the user's input and classify immediately — do not ask unless truly ambig
 | Raw lecture material, PDF outline, topic list, no question structure | **MODE B: Create from scratch** |
 | Both ("here's old soal + slides for broken ones") | **MODE A** then **MODE B** for gaps |
 | Explicit ask for "soal isian"/"essay"/"jawaban singkat", or a question is genuinely open-ended recall with no honest 5-option MCQ possible | **MODE C: Soal Isian/Essay** — runs alongside A/B, not instead of |
+| Trigger **"Soal minites"** | Tambahan gaya, berlaku di MODE A/B: baca `references/minites-pattern.md` dulu |
 
 MODE C questions never live inline with MODE A/B output — they always go into the separate **Bagian 3** table (see below), same document, own section.
+
+**Soal minites**: soal kasus klinis MCQ bergaya vignette. `references/minites-pattern.md` berisi ciri pola + beberapa contoh sampel. Pakai sebagai gambaran gaya saja: JANGAN menyalin soal persis, JANGAN meniru nomor soal bergambar / nomor soal kasus / nomor soal non-kasus dari bank sumber. Isi dan sebaran ditentukan materi pengguna. **Soal bergambar harus dibanyakkan** bila relevan untuk belajar materi (radiologi CT/MRI/foto polos, EKG, histologi/apusan, anatomi, lesi kulit/mata/telinga, funduskopi, dst.): jadikan gambar bagian dari petunjuk klinis, bukan hiasan. Pakai slot `[GAMBAR: ...]` dan sertakan daftar gambar yang dibutuhkan; jangan menghindari soal bergambar hanya karena gambarnya harus dicari pengguna.
 
 ---
 
