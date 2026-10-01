@@ -1,6 +1,6 @@
-{
-  "name": "aka-ai-plugin",
-  "version": "2.0.3",
-  "description": "Plugin aka-ai untuk mahasiswa kedokteran: tutor PBL/DKK, soalin (bank soal), tabel-cr, softfiler, transkrip, dan aka-help-me.",
-  "author": { "name": "dotleav" }
-}
+   {
+     "name": "aka-ai-plugin",
+     "version": "2.0.3",
+     "description": "Plugin aka-ai untuk mahasiswa kedokteran: tutor PBL/DKK, soalin (bank soal), tabel-cr, softfiler, transkrip, dan aka-help-me.",
+     "author": { "name": "dotleav" }
+   }
