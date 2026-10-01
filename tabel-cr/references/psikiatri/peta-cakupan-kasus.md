@@ -3,6 +3,7 @@
 Satu baris = satu diagnosis yang lazim jadi kasus OSCE/CBT psikiatri. Semua nomor = **halaman PDF**.
 - **PPDGJ** = `PPDGJ-III_buku-saku-Maslim.pdf` (kode F, pedoman diagnostik, diagnosis banding). Pakai untuk kolom KASUS dan Ax/Pf.
 - **Kaplan Dx / Tx** = halaman diagnosis dan terapi di Kaplan & Sadock 2021 (lihat `peta-kaplan-sadock.md`; PDF tidak dibundel). Pakai untuk tata laksana dan algoritma.
+- **DSM-5** = kriteria diagnostik tambahan; halaman per diagnosis di `peta-dsm5.md` (PDF tidak dibundel).
 - **Obat** = halaman farmakologi di Kaplan bab 21 untuk dosis dan efek samping.
 
 **Level SKDI tidak ada di berkas ini.** Ambil dari daftar kasus pengguna; jangan ditebak. Daftar kasus topik psikiatri belum ada (lihat `references/tambah-topik.md`).

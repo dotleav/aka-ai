@@ -1,7 +1,7 @@
 ---
 name: tabel-cr
 description: >-
-  Pembuat tabel kasus (CR) universal untuk OSCE/CBT kedokteran: satu kasus = satu baris pada tabel Word (docx) sungguhan dengan kolom tetap No, KASUS, Ax, Pf, PP, Tx, EDUKASI, untuk topik gangguan medis apa pun. Sumber bundel saat ini: neurologi (59 kasus FK UKDW, level SKDI 2024, PERDOSSI 2023) dan psikiatri (PPDGJ-III dibundel penuh, Kaplan & Sadock 2021 berupa peta halaman); topik lain ditambah bertahap. Gunakan setiap kali pengguna minta "tabel CR", "CR neurologi/kardiologi/…", "buatkan tabel kasus", ringkasan kasus per diagnosis beserta resep lege artis dan edukasi, atau menyebut SKDI/PERDOSSI/PPDGJ/Kaplan untuk simulasi OSCE, termasuk kasus psikiatri. Jika materi topik belum dibundel, skill ini mencari manual lewat web atau connector PubMed/Consensus.
+  Pembuat tabel kasus (CR) universal untuk OSCE/CBT kedokteran: satu kasus = satu baris pada tabel Word (docx) sungguhan dengan kolom tetap No, KASUS, Ax, Pf, PP, Tx, EDUKASI, untuk topik gangguan medis apa pun. Sumber bundel saat ini: neurologi (59 kasus FK UKDW, level SKDI 2024, PERDOSSI 2023) dan psikiatri (PPDGJ-III dibundel penuh, Kaplan & Sadock 2021 dan DSM-5 berupa peta halaman); topik lain ditambah bertahap. Gunakan setiap kali pengguna minta "tabel CR", "CR neurologi/kardiologi/…", "buatkan tabel kasus", ringkasan kasus per diagnosis beserta resep lege artis dan edukasi, atau menyebut SKDI/PERDOSSI/PPDGJ/Kaplan untuk simulasi OSCE, termasuk kasus psikiatri. Jika materi topik belum dibundel, skill ini mencari manual lewat web atau connector PubMed/Consensus.
 ---
 
 # Tabel CR (Kasus per Diagnosis)
@@ -19,7 +19,7 @@ Output: **file `.docx` berisi tabel Word sungguhan** (bukan markdown/pipe-table)
 | Topik | Folder | Isi |
 |---|---|---|
 | Neurologi | `references/neurologi/` | 59 kasus terverifikasi (9 Tabel CR + 50 SKDI), indeks PERDOSSI 2023, peta cakupan, PDF sumber |
-| Psikiatri | `references/psikiatri/` | PPDGJ-III (PDF + indeks kode F → halaman), peta Kaplan & Sadock 2021 (halaman PDF per gangguan, PDF tidak dibundel), peta diagnosis → halaman. Daftar kasus + level SKDI belum ada: minta dari pengguna |
+| Psikiatri | `references/psikiatri/` | PPDGJ-III (PDF + indeks kode F → halaman), peta Kaplan & Sadock 2021 dan peta DSM-5 (halaman PDF per gangguan, PDF tidak dibundel), peta diagnosis → halaman. Daftar kasus + level SKDI belum ada: minta dari pengguna |
 
 Topik lain: belum ada. Pengguna akan menambah bertahap (cara: `references/tambah-topik.md`).
 
@@ -32,11 +32,12 @@ Topik lain: belum ada. Pengguna akan menambah bertahap (cara: `references/tambah
 - `references/psikiatri/peta-cakupan-kasus.md` — **mulai dari sini untuk kasus psikiatri**: diagnosis → kode F, halaman PPDGJ, halaman Kaplan (Dx/Tx/obat).
 - `references/psikiatri/daftar-isi-ppdgj3.md` — indeks halaman PPDGJ-III (kode F00–F98, silsilah DD).
 - `references/psikiatri/PPDGJ-III_buku-saku-Maslim.pdf` — sumber diagnosis psikiatri Indonesia (172 hlm).
+- `references/psikiatri/peta-dsm5.md` — peta halaman kriteria diagnostik DSM-5 per diagnosis; PDF tidak dibundel, cari di `/mnt/user-data/uploads/` (nama berisi "DSM") atau minta pengguna unggah.
 - `references/psikiatri/peta-kaplan-sadock.md` — peta bab/bagian Kaplan & Sadock 2021; PDF buku tidak dibundel, cari di `/mnt/user-data/uploads/` atau minta pengguna unggah.
 
 ## Alur kerja per kasus
 1. **Tentukan topik & daftar kasus.** Topik ada di tabel di atas → pakai daftar kasusnya. Topik belum ada → minta pengguna daftar kasus (atau usulkan dari SKDI/kurikulum, lalu konfirmasi) dan lanjut ke langkah 3.
-2. **Materi bundel ada?** Cek peta cakupan topik. Psikiatri: diagnosis dan kode dari PPDGJ-III (ICD-10, kode F), terapi dan dosis dari Kaplan & Sadock; kedua sumber beda sistem (ICD-10 vs DSM-5), jadi tulis kode F di kolom KASUS dan sebut kriteria Kaplan hanya bila melengkapi. Ada → ekstrak HANYA halaman relevan (±10 halaman dari indeks) dengan `bash_tool` + pypdf; `view` dengan `view_range` hanya bila tabel/gambar dibutuhkan. Jangan `view` seluruh PDF.
+2. **Materi bundel ada?** Cek peta cakupan topik. Psikiatri: diagnosis dan kode dari PPDGJ-III (ICD-10, kode F), kriteria DSM-5 dari `peta-dsm5.md`, terapi dan dosis dari Kaplan & Sadock; PPDGJ (ICD-10) dan DSM-5 beda sistem, jadi tulis kode F di kolom KASUS dan sebut kriteria DSM-5 hanya bila melengkapi. Ada → ekstrak HANYA halaman relevan (±10 halaman dari indeks) dengan `bash_tool` + pypdf; `view` dengan `view_range` hanya bila tabel/gambar dibutuhkan. Jangan `view` seluruh PDF.
 3. **Materi tidak ada / kurang → cari manual.** Urutan:
    - Connector **PubMed** dan **Consensus**: panggil `tool_search` dulu (deferred tools), pakai bila terhubung. Query spesifik ke celah klinis (kriteria diagnosis, dosis dewasa/anak, algoritma), bukan query umum.
    - Connector tidak tersedia → `web_search` / `web_fetch`. Utamakan PPK/guideline nasional (Kemenkes, perhimpunan profesi), lalu guideline internasional, lalu review terindeks. Hindari forum dan blog.

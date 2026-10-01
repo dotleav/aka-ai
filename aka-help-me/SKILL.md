@@ -33,7 +33,7 @@ Membantu membuat kuis interaktif.
 ## /aka-ai:tabel-cr
 Membuat file docx berisi tabel kasus untuk persiapan CR: satu kasus satu baris, dengan kolom No, KASUS, Ax, Pf, PP, Tx, EDUKASI. Levelnya mengacu ke SKDI 2024.
 - Cara pakai: cukup ketik "Saya ingin tabel CR mengenai gangguan X".
-- Materi bawaan saat ini neurologi (59 kasus, SKDI 2024 dan PERDOSSI 2023) dan psikiatri (PPDGJ-III penuh, peta halaman Kaplan & Sadock 2021). Untuk topik lain, Claude mencari materinya lewat PubMed, Consensus, atau web.
+- Materi bawaan saat ini neurologi (59 kasus, SKDI 2024 dan PERDOSSI 2023) dan psikiatri (PPDGJ-III penuh, peta halaman Kaplan & Sadock 2021 dan DSM-5). Untuk topik lain, Claude mencari materinya lewat PubMed, Consensus, atau web.
 - Tip: hubungkan akun Claude kamu ke PubMed dan Consensus supaya kerjanya lebih lancar.
 - Kalau kamu butuh sumbernya juga, tambahkan ke prompt: "Tulis sumber di setiap kasus" atau "Tulis sumber di akhir halaman".
 
