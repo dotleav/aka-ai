@@ -1,17 +1,6 @@
 ---
 name: soalin
-description: >
-  Build medical quiz banks in Soalin's exact plain-text docx format. Use this skill
-  whenever the user wants to: (1) convert raw/messy quiz banks into clean Soalin format,
-  (2) create quizzes from scratch from lecture slides, PDFs, or source material,
-  (3) process last year's exam banks with student comments and fix salvageable questions,
-  (4) generate a broken-question recovery table for image-dependent or ambiguous questions,
-  (5) embed image references or crop markers, (6) fix images/answer options in an existing
-  docx bank: permanent crops, image placement, rebalance answer-option patterns, or
-  (7) create or triage short-answer/essay ("isian") recall questions that don't fit MCQ.
-  Trigger on: "soalin", "quiz bank", "soal UB", "soal ujian", "buat soal", "convert soal",
-  "kunci jawaban", "penjelasan", "crop gambar", "distribusi jawaban", "soal isian", "essay",
-  "jawaban singkat", "soal minites", any .docx quiz file, or medical MCQ with Indonesian anatomy/physiology.
+description: "Build medical quiz banks in Soalin's exact plain-text docx format. Use this skill whenever the user wants to: (1) convert raw/messy quiz banks into clean Soalin format, (2) create quizzes from scratch from lecture slides, PDFs, or source material, (3) process last year's exam banks with student comments and fix salvageable questions, (4) generate a broken-question recovery table for image-dependent or ambiguous questions, (5) embed image references or crop markers, (6) fix images/answer options in an existing docx bank: permanent crops, image placement, rebalance answer-option patterns, or (7) create or triage short-answer/essay (\"isian\") recall questions that don't fit MCQ. Trigger on: \"soalin\", \"quiz bank\", \"soal UB\", \"soal ujian\", \"buat soal\", \"convert soal\", \"kunci jawaban\", \"penjelasan\", \"crop gambar\", \"distribusi jawaban\", \"soal isian\", \"essay\", \"jawaban singkat\", \"soal minites\", any .docx quiz file, or medical MCQ with Indonesian anatomy/physiology.\n"
 ---
 
 # Soalin
@@ -56,13 +45,17 @@ Kunci: {letter}
 
 Penjelasan: {explanation text}
 
+Sumber: {nama materi} hal. {nomor halaman/slide} ({ID kuliah bila ada})
+
 ```
 
 **Rules:**
 - One blank line between every element (question, each option, Kunci, Penjelasan, next question)
 - `Kunci:` line is REQUIRED for every valid question. If missing → question goes to broken table.
+- `Sumber:` line is REQUIRED (standing rule) — its own paragraph directly under `Penjelasan:`, format `Sumber: Binder2 hal. 614-616 (K13)`. `Sumber:` points to the slide/page that EXPLAINS THE ANSWER (the pages that justify the Kunci and Penjelasan: definition, criteria, table, dose, mechanism), NOT the page the vignette or image was taken from. Image-origin pages go only in the CATATAN GAMBAR list. Use the binder2-blok2h skill to find and read the explaining pages; for other source files use their own page/slide number. Only omit when the source truly has no page numbers (e.g. pasted text); then write `Sumber: {nama materi}`. Knowledge not in the source is still flagged inside Penjelasan.
 - `Penjelasan:` line is REQUIRED. If missing but question is salvageable → write one from medical knowledge.
 - Options always A through E (5 options). If fewer → broken table.
+- MODE A/triage: keep any existing source reference; if the question has none and the page is unknown, write `Sumber: rekapan lama`.
 - No bold, no markdown, no extra formatting — pure plain text.
 - Numbering is sequential from 1 for the whole file.
 
@@ -88,6 +81,8 @@ E. E
 Kunci: {letter if known}
 
 Penjelasan: {explanation} [Lihat gambar: {filename or slide ref}]
+
+Sumber: {materi} hal. {N}
 
 ```
 
