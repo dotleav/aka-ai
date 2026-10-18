@@ -8,6 +8,33 @@ description: "Build medical quiz banks in Soalin's exact plain-text docx format.
 Builds quiz content in **Soalin's plain-text `.docx` format** — the format the Soalin
 web app parses to generate interactive quizzes.
 
+
+## UPDATE: Sumber otomatis dari PDF materi (wajib dibaca dulu)
+
+Skill ini sekarang bisa membuat `Sumber:` langsung dari PDF materi. Ada dua alur:
+
+### Alur 1 — Ada file soal + PDF materi (MODE A + sumber)
+1. Buat `q.json` dari soal: tiap soal punya `no`, `soal`, `opsi` (huruf, teks, penjelasan per opsi), `kunci`, `gambar_penjelasan`, dan `cari` (kata kunci untuk mencari halaman penjelas). Soal tanpa kunci atau yang butuh gambar tanpa kunci: `broken: true`.
+2. Kandidat halaman:
+   `python scripts/attach_sources.py candidates --pdf MATERI.pdf --questions q.json --out cand.json --top 3 --render pages/`
+3. VERIFIKASI VISUAL WAJIB. Buka tiap PNG di `pages/` dengan view, lalu baca soalnya. Halaman harus memuat jawaban yang benar atau dasar penjelasan opsi. Kata kunci yang cocok BUKAN bukti. Halaman yang hanya menyebut istilah (mis. "S3" di kasus klinis, atau judul "Lnn inguinal" tanpa daftar nodi) bukan sumber yang baik. Kalau tidak ada halaman yang menjelaskan, tulis `tidak ditemukan di slide` dan jangan mengarang halaman.
+4. Tulis `choices.json` (`{"no": {"pages": [N, ...], "note": "..."}}`), lalu terapkan:
+   `python scripts/attach_sources.py apply --questions q.json --choices choices.json --pdf MATERI.pdf --out q_sourced.json`
+5. Build docx: `python scripts/build_soalin_docx.py --questions q_sourced.json --out bank.docx`
+
+### Alur 2 — Hanya PDF materi (MODE B + sumber)
+1. Indeks halaman: `python scripts/pdf_index.py index --pdf MATERI.pdf --out index.json`. Baca `index.json` untuk melihat topik per halaman, lalu render halaman yang relevan (`pdf_index.py render`) dan lihat secara visual.
+2. Buat soal HANYA dari isi halaman yang sudah kamu lihat. Setiap soal wajib punya `sumber` = halaman tempat jawabannya dijelaskan (dicatat lewat `choices.json` + `apply`). Jangan membuat soal dari pengetahuan umum lalu mencari halamannya; kalau materi tidak memuatnya, buang soalnya atau tandai `tidak ditemukan di slide`.
+3. Lanjut ke langkah 5 Alur 1.
+
+### Aturan tambahan (berlaku untuk semua alur)
+- Nomor soal: pertahankan nomor asli (`no`) bila pengguna minta urutan sama. Gunakan `--renumber` hanya bila diminta.
+- Penjelasan per opsi WAJIB (`{...}` di setiap opsi). Build akan gagal bila kosong.
+- `Gambar Penjelasan:` dan slot gambar: gambar TIDAK pernah ditanam. Soal bergambar: `gambar_soal` (slot di bawah teks soal, di atas A). Gambar penjelasan: `gambar_penjelasan_slot` (setelah `Gambar Penjelasan:`, sebelum `Sumber:`). Pengguna memasukkan gambarnya sendiri.
+- Bagian 2 hanya untuk soal rusak (`broken: true` atau kunci tidak ada). Jangan memindahkan soal yang sudah valid ke Bagian 2.
+- Jangan memakai nama sumber lama seperti "1J All in one". Sumber harus memakai nama file PDF yang diberikan pengguna.
+- Pengetahuan di luar PDF tetap boleh dipakai, tapi harus ditandai di penjelasan atau di sumber (`dari pengetahuan umum`).
+
 ## First: Detect Input Mode
 
 Read the user's input and classify immediately — do not ask unless truly ambiguous:
@@ -28,36 +55,36 @@ MODE C questions never live inline with MODE A/B output — they always go into 
 
 ## Soalin Format Spec (memorize this — do not deviate)
 
+Format terbaru: penjelasan ditulis **per opsi** di dalam `{...}` pada baris opsi itu, lalu
+`Kunci:` menandai jawaban benar, dan `Gambar Penjelasan:` berisi penjelasan umum (teks dan/atau gambar).
+
 ```
-{N}. {Question text}
-
-A. {option}
-
-B. {option}
-
-C. {option}
-
-D. {option}
-
-E. {option}
-
-Kunci: {letter}
-
-Penjelasan: {explanation text}
-
+{N}. {Pertanyaan}
+[GAMBAR soal, kalau ada — paragraf sendiri, di bawah teks soal]
+A. {opsi A} {penjelasan: mengapa opsi ini benar atau salah}
+B. {opsi B} {penjelasan: mengapa opsi ini benar atau salah}
+C. {opsi C} {penjelasan: mengapa opsi ini benar atau salah}
+D. {opsi D} {penjelasan: mengapa opsi ini benar atau salah}
+E. {opsi E} {penjelasan: mengapa opsi ini benar atau salah}
+Kunci: {huruf}
+Gambar Penjelasan: {penjelasan umum, teks boleh, boleh dikosongkan}
+[GAMBAR penjelasan, kalau ada]
 Sumber: {nama materi} hal. {nomor halaman/slide} ({ID kuliah bila ada})
-
 ```
+
+Setiap baris di atas = satu paragraf Word. Tanpa baris kosong tambahan di antara opsi.
 
 **Rules:**
-- One blank line between every element (question, each option, Kunci, Penjelasan, next question)
-- `Kunci:` line is REQUIRED for every valid question. If missing → question goes to broken table.
-- `Sumber:` line is REQUIRED (standing rule) — its own paragraph directly under `Penjelasan:`, format `Sumber: Binder2 hal. 614-616 (K13)`. `Sumber:` points to the slide/page that EXPLAINS THE ANSWER (the pages that justify the Kunci and Penjelasan: definition, criteria, table, dose, mechanism), NOT the page the vignette or image was taken from. Image-origin pages go only in the CATATAN GAMBAR list. Use the binder2-blok2h skill to find and read the explaining pages; for other source files use their own page/slide number. Only omit when the source truly has no page numbers (e.g. pasted text); then write `Sumber: {nama materi}`. Knowledge not in the source is still flagged inside Penjelasan.
-- `Penjelasan:` line is REQUIRED. If missing but question is salvageable → write one from medical knowledge.
+- **Penjelasan per opsi WAJIB.** Setiap opsi A–E diakhiri `{...}` berisi alasan opsi itu benar atau salah. Tulis dalam satu baris (satu paragraf). Jangan menyebut huruf opsi lain di dalam kurung (tulis alasannya langsung, mis. `{Bukan penyebab klasik, hanya efek samping.}`). Penjelasan opsi yang kosong tidak ditampilkan di app, tetapi tetap tulis untuk semua opsi.
+- **`Kunci:` WAJIB** untuk setiap soal valid — ini penanda jawaban benar. Kalau hilang → broken table.
+- **`Gambar Penjelasan:` opsional.** Dipakai untuk pembahasan umum berbentuk teks, gambar, atau keduanya. Kalau tidak ada isinya, baris ini boleh dihilangkan.
+- Jangan tulis lagi `Penjelasan: …` satu blok (format lama). Parser masih membacanya hanya untuk file lama.
+- `Sumber:` line is REQUIRED (standing rule) — its own paragraph after `Gambar Penjelasan:` (atau setelah `Kunci:` bila `Gambar Penjelasan:` dihilangkan). Format `Sumber: Binder2 hal. 614-616 (K13)`. `Sumber:` points to the slide/page that EXPLAINS THE ANSWER (the pages that justify the Kunci and the per-option penjelasan: definition, criteria, table, dose, mechanism), NOT the page the vignette or image was taken from. Image-origin pages go only in the CATATAN GAMBAR list. Use the binder2-blok2h skill to find and read the explaining pages; for other source files use their own page/slide number. Only omit when the source truly has no page numbers (e.g. pasted text); then write `Sumber: {nama materi}`. Knowledge not in the source is still flagged inside the penjelasan.
 - Options always A through E (5 options). If fewer → broken table.
 - MODE A/triage: keep any existing source reference; if the question has none and the page is unknown, write `Sumber: rekapan lama`.
 - No bold, no markdown, no extra formatting — pure plain text.
 - Numbering is sequential from 1 for the whole file.
+- Bila file di `references/` masih menulis `Penjelasan:` sebagai satu blok, anggap itu penjelasan per opsi (tulis di `{...}` tiap opsi) ditambah `Gambar Penjelasan:` untuk ringkasan umum.
 
 ### Image-dependent questions (questions referring to a figure/diagram)
 
@@ -65,25 +92,15 @@ When a question says "huruf A/B/C/D" or "gambar nomor 1/2/3" or options are lite
 
 ```
 {N}. {Question text}
-
 [GAMBAR: {brief image description — e.g., "Histologi alveolus berlabel A-E"}]
-
-A. A
-
-B. B
-
-C. C
-
-D. D
-
-E. E
-
+A. A {penjelasan mengapa A benar atau salah}
+B. B {penjelasan mengapa B benar atau salah}
+C. C {penjelasan mengapa C benar atau salah}
+D. D {penjelasan mengapa D benar atau salah}
+E. E {penjelasan mengapa E benar atau salah}
 Kunci: {letter if known}
-
-Penjelasan: {explanation} [Lihat gambar: {filename or slide ref}]
-
+Gambar Penjelasan: {penjelasan umum} [Lihat gambar: {filename or slide ref}]
 Sumber: {materi} hal. {N}
-
 ```
 
 `[GAMBAR: q{N}_gambar.png — {brief description}]` is the image slot contract. Script handles extraction.
@@ -95,12 +112,12 @@ Sumber: {materi} hal. {N}
 See `references/triage-rules.md` for full decision tree. Short version:
 
 ### Pass → Keep (fix minimally)
-- Has numbered question, 5 A-E options, a Kunci, a Penjelasan (or one can be written)
+- Has numbered question, 5 A-E options each with a `{penjelasan}`, and a Kunci (missing per-option penjelasan can be written)
 - Student comments like "Kaga tau 😁", "harusnya X", "buku SL" → strip silently
 - Minor typos/inconsistency in Kunci → fix if medically obvious, flag in Penjelasan if uncertain
 
 ### Salvage → Fix and Keep
-- Missing Penjelasan only → write one from medical knowledge, mark it `[Penjelasan dibuatkan]`
+- Missing per-option `{penjelasan}` only → write them from medical knowledge, mark the Gambar Penjelasan `[Penjelasan dibuatkan]`
 - Wrong Kunci suspected by student note → verify medically, correct if confident
 - Image-dependent but Kunci is known → keep, add `[GAMBAR: ...]` slot + tell user which image
 
@@ -154,8 +171,11 @@ When the question genuinely needs a figure, write:
 
 A. ...
 ...
+A. ... {penjelasan}
+...
+E. ... {penjelasan}
 Kunci: C
-Penjelasan: ... [Lihat gambar yang disertakan]
+Gambar Penjelasan: ... [Lihat gambar yang disertakan]
 ```
 
 Then tell the user: **"Butuh gambar: {precise description}. Screenshot dari slide {topic} atau crop dari atlas."**
@@ -192,7 +212,7 @@ looks like a heading does not work.
   enough to self-check against.
 
 Rules:
-- No `Kunci:`/`Penjelasan:` lines — isian questions don't have those fields.
+- No `Kunci:`, `{penjelasan}`, or `Gambar Penjelasan:` — isian questions don't have those fields.
 - Numbering in the `No` column continues the same running sequence as Bagian 1/2, it does
   not restart at 1.
 - Isian questions never enter Mode Tentamen (timed exam mode) or answer-distribution
@@ -261,7 +281,7 @@ Semua perintah `--output` menulis file baru; jangan menimpa file asli pengguna.
 
 Final output ini WAJIB berupa file `.docx` — bukan `.md`, bukan ditempel sebagai teks di chat. Ini berlaku untuk MODE A (triage) maupun MODE B (create from scratch); MODE A biasanya sudah bekerja langsung di atas docx pengguna lewat pipeline gambar, tapi bila hasil MODE A hanya berupa teks tanpa gambar, tetap tulis ke `.docx` sebelum `present_files`, jangan tempel plain text.
 
-- **MODE B / bank baru tanpa docx sumber**: setelah teks Soalin (struktur di bawah) selesai untuk satu batch, tulis ke `.docx` dengan `docx` (npm, lihat skill `docx`). Bagian 1 (soal MCQ): tiap baris pada spec (soal, tiap opsi, `Kunci:`, `Penjelasan:`, baris kosong pemisah) jadi satu `Paragraph` polos (tanpa bold/heading/formatting lain). Bagian 2 (rusak) dan Bagian 3 (isian), bila ada: masing-masing WAJIB satu `Paragraph` ber-`heading: HeadingLevel.HEADING_2` berisi teks persis "Bagian 2" / "Bagian 3" (bukan teks biasa, bukan bold-manual — harus style Heading asli, ini yang dibaca parser lewat tag `<h1-3>` hasil convert), diikuti satu `Table` sungguhan (`Table`/`TableRow`/`TableCell` dari `docx`) dengan kolom sesuai spec di atas (3 kolom masing-masing). Tanpa Heading asli ini, parser Soalin tidak akan pernah mendeteksi Bagian 3, dan kalau Bagian 2 + Bagian 3 sama-sama ada tanpa heading keduanya bisa ketuker (baris isian ke-parse sebagai soal rusak). Kasus pertama: `create_file` skrip docx-js baru. Batch berikutnya: buka docx yang sudah ada dan tambahkan paragraf/table di akhir `word/document.xml` (unzip → edit → zip, lihat skill `docx`) — jangan generate ulang dari nol.
+- **MODE B / bank baru tanpa docx sumber**: setelah teks Soalin (struktur di bawah) selesai untuk satu batch, tulis ke `.docx` dengan `docx` (npm, lihat skill `docx`). Bagian 1 (soal MCQ): tiap baris pada spec (soal, tiap opsi beserta `{penjelasan}`-nya, `Kunci:`, `Gambar Penjelasan:`) jadi satu `Paragraph` polos (tanpa bold/heading/formatting lain). Bagian 2 (rusak) dan Bagian 3 (isian), bila ada: masing-masing WAJIB satu `Paragraph` ber-`heading: HeadingLevel.HEADING_2` berisi teks persis "Bagian 2" / "Bagian 3" (bukan teks biasa, bukan bold-manual — harus style Heading asli, ini yang dibaca parser lewat tag `<h1-3>` hasil convert), diikuti satu `Table` sungguhan (`Table`/`TableRow`/`TableCell` dari `docx`) dengan kolom sesuai spec di atas (3 kolom masing-masing). Tanpa Heading asli ini, parser Soalin tidak akan pernah mendeteksi Bagian 3, dan kalau Bagian 2 + Bagian 3 sama-sama ada tanpa heading keduanya bisa ketuker (baris isian ke-parse sebagai soal rusak). Kasus pertama: `create_file` skrip docx-js baru. Batch berikutnya: buka docx yang sudah ada dan tambahkan paragraf/table di akhir `word/document.xml` (unzip → edit → zip, lihat skill `docx`) — jangan generate ulang dari nol.
 - **MODE A dengan docx sumber**: ikuti pipeline gambar (`bake`/`sync-pdf` → `dump` → `check --fix` → `audit` → `shuffle`) seperti biasa; hasil akhirnya sudah docx. Kalau sumbernya sudah punya tabel rusak/isian tapi tanpa Heading "Bagian 2"/"Bagian 3" di atasnya (umum kalau bank lama ditulis sebelum aturan ini), sisipkan Heading itu langsung ke `word/document.xml` sebelum tabel yang bersangkutan — jangan biarkan tabel tanpa heading kalau lebih dari satu tabel non-MCQ ada di dokumen.
 - Struktur isi (urutan di dalam docx, tetap sama seperti sebelumnya, sekarang dengan Bagian 3):
 

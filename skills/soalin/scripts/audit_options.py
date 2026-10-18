@@ -22,7 +22,7 @@ from pathlib import Path
 OPT = re.compile(r"^(\s*)([A-E])(\s*[.)]\s*)(.*)$", re.S)
 NUM = re.compile(r"^\s*\d+\s*[.)]\s+\S")
 KUNCI = re.compile(r"^(\s*Kunci\s*:\s*)([A-E])", re.I)
-PENJ = re.compile(r"^\s*Penjelasan\s*:", re.I)
+PENJ = re.compile(r"^\s*(?:Gambar\s+)?Penjelasan\s*:", re.I)
 POSITIONAL = re.compile(r"\b(semua (jawaban )?(di atas )?(benar|salah)|tidak ada (jawaban )?(di atas|yang benar)|kecuali|kombinasi|[A-E] dan [A-E]|[A-E] semua|jawaban di atas|pilihan di atas)\b", re.I)
 LETTER_REF = re.compile(r"\b(opsi|pilihan|jawaban|option)\s+[A-E]\b", re.I)
 ABSOLUTE = re.compile(r"\b(selalu|tidak pernah|semua|seluruh|hanya|pasti|mutlak|satu-satunya)\b", re.I)
