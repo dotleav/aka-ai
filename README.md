@@ -1,6 +1,6 @@
 # aka-ai-plugin
 
-Plugin Claude Code berisi 6 skill untuk kebutuhan koas kedokteran (UKDW): tutorial PBL, bank soal, tabel kasus OSCE, konversi materi ke markdown, dan rapikan transkrip kuliah.
+Plugin Claude berisi 6 skill untuk kebutuhan koas kedokteran (UKDW): tutorial PBL, bank soal, tabel kasus OSCE, konversi materi ke markdown, dan rapikan transkrip kuliah.
 
 ## Instalasi
 
