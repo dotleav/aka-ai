@@ -215,7 +215,7 @@ def sync_pdf(files, pdf_path, tol=0.03):
 OPT = re.compile(r"^\s*([A-E])\s*[.)]\s*\S?")
 NUM = re.compile(r"^\s*\d+\s*[.)]\s+\S")
 KUNCI = re.compile(r"^\s*Kunci\s*:", re.I)
-PENJ = re.compile(r"^\s*Penjelasan\s*:", re.I)
+PENJ = re.compile(r"^\s*(?:Gambar\s+)?Penjelasan\s*:", re.I)
 PPR_AFTER_JC = {W + x for x in ("textDirection", "textAlignment", "textboxTightWrap", "outlineLvl",
                                 "divId", "cnfStyle", "rPr", "sectPr", "pPrChange")}
 

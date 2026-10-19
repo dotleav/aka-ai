@@ -56,7 +56,7 @@ MODE C questions never live inline with MODE A/B output — they always go into 
 ## Soalin Format Spec (memorize this — do not deviate)
 
 Format terbaru: penjelasan ditulis **per opsi** di dalam `{...}` pada baris opsi itu, lalu
-`Kunci:` menandai jawaban benar, dan `Gambar Penjelasan:` berisi penjelasan umum (teks dan/atau gambar).
+Jawaban benar ditandai dengan **highlight kuning** pada seluruh baris opsinya (tidak ada baris `Kunci:`), dan `Gambar Penjelasan:` berisi penjelasan umum (teks dan/atau gambar).
 
 ```
 {N}. {Pertanyaan}
@@ -66,20 +66,20 @@ B. {opsi B} {penjelasan: mengapa opsi ini benar atau salah}
 C. {opsi C} {penjelasan: mengapa opsi ini benar atau salah}
 D. {opsi D} {penjelasan: mengapa opsi ini benar atau salah}
 E. {opsi E} {penjelasan: mengapa opsi ini benar atau salah}
-Kunci: {huruf}
 Gambar Penjelasan: {penjelasan umum, teks boleh, boleh dikosongkan}
 [GAMBAR penjelasan, kalau ada]
 Sumber: {nama materi} hal. {nomor halaman/slide} ({ID kuliah bila ada})
 ```
 
 Setiap baris di atas = satu paragraf Word. Tanpa baris kosong tambahan di antara opsi.
+Opsi yang benar: **seluruh baris opsi itu di-highlight kuning** (Word: Highlight → Yellow). Di python-docx: `run.font.highlight_color = WD_COLOR_INDEX.YELLOW` untuk tiap run di paragraf opsi. Jangan tulis baris `Kunci:` (format lama). Istilah "Kunci" di bawah berarti opsi yang di-highlight.
 
 **Rules:**
 - **Penjelasan per opsi WAJIB.** Setiap opsi A–E diakhiri `{...}` berisi alasan opsi itu benar atau salah. Tulis dalam satu baris (satu paragraf). Jangan menyebut huruf opsi lain di dalam kurung (tulis alasannya langsung, mis. `{Bukan penyebab klasik, hanya efek samping.}`). Penjelasan opsi yang kosong tidak ditampilkan di app, tetapi tetap tulis untuk semua opsi.
-- **`Kunci:` WAJIB** untuk setiap soal valid — ini penanda jawaban benar. Kalau hilang → broken table.
+- **Jawaban benar WAJIB di-highlight kuning** pada seluruh baris opsinya — tepat satu opsi per soal. Tanpa highlight → broken table.
 - **`Gambar Penjelasan:` opsional.** Dipakai untuk pembahasan umum berbentuk teks, gambar, atau keduanya. Kalau tidak ada isinya, baris ini boleh dihilangkan.
 - Jangan tulis lagi `Penjelasan: …` satu blok (format lama). Parser masih membacanya hanya untuk file lama.
-- `Sumber:` line is REQUIRED (standing rule) — its own paragraph after `Gambar Penjelasan:` (atau setelah `Kunci:` bila `Gambar Penjelasan:` dihilangkan). Format `Sumber: Binder2 hal. 614-616 (K13)`. `Sumber:` points to the slide/page that EXPLAINS THE ANSWER (the pages that justify the Kunci and the per-option penjelasan: definition, criteria, table, dose, mechanism), NOT the page the vignette or image was taken from. Image-origin pages go only in the CATATAN GAMBAR list. Use the binder2-blok2h skill to find and read the explaining pages; for other source files use their own page/slide number. Only omit when the source truly has no page numbers (e.g. pasted text); then write `Sumber: {nama materi}`. Knowledge not in the source is still flagged inside the penjelasan.
+- `Sumber:` line is REQUIRED (standing rule) — its own paragraph after `Gambar Penjelasan:` (atau setelah opsi E bila `Gambar Penjelasan:` dihilangkan). Format `Sumber: Binder2 hal. 614-616 (K13)`. `Sumber:` points to the slide/page that EXPLAINS THE ANSWER (the pages that justify the Kunci and the per-option penjelasan: definition, criteria, table, dose, mechanism), NOT the page the vignette or image was taken from. Image-origin pages go only in the CATATAN GAMBAR list. Use the binder2-blok2h skill to find and read the explaining pages; for other source files use their own page/slide number. Only omit when the source truly has no page numbers (e.g. pasted text); then write `Sumber: {nama materi}`. Knowledge not in the source is still flagged inside the penjelasan.
 - Options always A through E (5 options). If fewer → broken table.
 - MODE A/triage: keep any existing source reference; if the question has none and the page is unknown, write `Sumber: rekapan lama`.
 - No bold, no markdown, no extra formatting — pure plain text.
@@ -98,7 +98,7 @@ B. B {penjelasan mengapa B benar atau salah}
 C. C {penjelasan mengapa C benar atau salah}
 D. D {penjelasan mengapa D benar atau salah}
 E. E {penjelasan mengapa E benar atau salah}
-Kunci: {letter if known}
+(opsi yang benar di-highlight kuning, bila jawabannya sudah diketahui)
 Gambar Penjelasan: {penjelasan umum} [Lihat gambar: {filename or slide ref}]
 Sumber: {materi} hal. {N}
 ```
@@ -112,7 +112,7 @@ Sumber: {materi} hal. {N}
 See `references/triage-rules.md` for full decision tree. Short version:
 
 ### Pass → Keep (fix minimally)
-- Has numbered question, 5 A-E options each with a `{penjelasan}`, and a Kunci (missing per-option penjelasan can be written)
+- Has numbered question, 5 A-E options each with a `{penjelasan}`, and one option highlighted yellow as the answer (missing per-option penjelasan can be written)
 - Student comments like "Kaga tau 😁", "harusnya X", "buku SL" → strip silently
 - Minor typos/inconsistency in Kunci → fix if medically obvious, flag in Penjelasan if uncertain
 
@@ -174,7 +174,7 @@ A. ...
 A. ... {penjelasan}
 ...
 E. ... {penjelasan}
-Kunci: C
+(opsi C di-highlight kuning)
 Gambar Penjelasan: ... [Lihat gambar yang disertakan]
 ```
 
@@ -212,7 +212,7 @@ looks like a heading does not work.
   enough to self-check against.
 
 Rules:
-- No `Kunci:`, `{penjelasan}`, or `Gambar Penjelasan:` — isian questions don't have those fields.
+- No highlight, `{penjelasan}`, or `Gambar Penjelasan:` — isian questions don't have those fields.
 - Numbering in the `No` column continues the same running sequence as Bagian 1/2, it does
   not restart at 1.
 - Isian questions never enter Mode Tentamen (timed exam mode) or answer-distribution
@@ -241,7 +241,7 @@ Crop bawaan Google Docs hanya menyimpan "jendela" (srcRect) di atas gambar utuh.
 3. Aturan: **bila di PDF gambar sudah ter-crop, hasil akhir harus ter-crop persis seperti itu.** Jangan crop ulang dengan selera sendiri.
 
 ### 2. Crop manual hanya bila gambar membocorkan kunci
-Setelah langkah 1, `docx_images.py dump --docx out.docx --outdir imgs`, lalu `view` tiap gambar berdampingan dengan soal, Kunci, dan Penjelasan. Crop manual HANYA bila gambar membocorkan jawaban, misalnya: keterangan/label/legenda yang menyebut diagnosis atau struktur yang ditanyakan, judul gambar berisi jawaban, panah berlabel jawaban di luar yang ditanyakan. Bukan bocor: label huruf A–E yang memang dipakai opsi.
+Setelah langkah 1, `docx_images.py dump --docx out.docx --outdir imgs`, lalu `view` tiap gambar berdampingan dengan soal, opsi yang di-highlight, dan Penjelasan. Crop manual HANYA bila gambar membocorkan jawaban, misalnya: keterangan/label/legenda yang menyebut diagnosis atau struktur yang ditanyakan, judul gambar berisi jawaban, panah berlabel jawaban di luar yang ditanyakan. Bukan bocor: label huruf A–E yang memang dipakai opsi.
 Bocor → `docx_images.py trim --image imgs/img_NN.png --crop L T R B --output x.png` (fraksi 0–1), lalu `docx_images.py replace --docx out.docx --index NN --image x.png --output out.docx`. Sebutkan ke pengguna soal mana yang di-crop manual dan bagian apa yang dibuang. Tidak bocor → jangan sentuh.
 
 ### 3. Penempatan gambar
@@ -255,7 +255,7 @@ Slot `[GAMBAR: ...]` pada teks Soalin sudah berada di posisi benar (di bawah soa
 Cek: `python scripts/audit_options.py audit --input bank.docx` (atau .txt). Laporan: distribusi huruf kunci, streak, kunci selalu terpanjang, hanya kunci yang berkurung "( )" atau berklausa koma, kata absolut di distraktor.
 Perbaiki dalam dua tahap:
 1. **Tulis ulang opsi bermasalah** (Claude, bukan script) mengikuti `references/kualitas-opsi.md`: samakan panjang dan struktur, hilangkan penjelas hanya di kunci, beri distraktor tingkat detail yang sama.
-2. **Acak posisi kunci**: `audit_options.py shuffle --input bank.docx --output out.docx`. Script hanya mengubah teks opsi dan huruf Kunci; gambar dan layout aman. Soal opsi-label gambar, opsi numerik berurutan, "semua/tidak ada jawaban benar", dan Penjelasan yang menyebut huruf dilewati otomatis; bila Penjelasan menyebut huruf, ubah manual.
+2. **Acak posisi kunci**: `audit_options.py shuffle --input bank.docx --output out.docx`. Script hanya mengubah teks opsi dan posisi highlight (atau huruf `Kunci:` pada bank lama); gambar dan layout aman. Soal opsi-label gambar, opsi numerik berurutan, "semua/tidak ada jawaban benar", dan Penjelasan yang menyebut huruf dilewati otomatis; bila Penjelasan menyebut huruf, ubah manual.
 Jalankan `audit` lagi setelah selesai dan laporkan angka sebelum/sesudah dalam 2–3 baris.
 
 ### Urutan kerja bank docx yang sudah ada
@@ -281,7 +281,7 @@ Semua perintah `--output` menulis file baru; jangan menimpa file asli pengguna.
 
 Final output ini WAJIB berupa file `.docx` — bukan `.md`, bukan ditempel sebagai teks di chat. Ini berlaku untuk MODE A (triage) maupun MODE B (create from scratch); MODE A biasanya sudah bekerja langsung di atas docx pengguna lewat pipeline gambar, tapi bila hasil MODE A hanya berupa teks tanpa gambar, tetap tulis ke `.docx` sebelum `present_files`, jangan tempel plain text.
 
-- **MODE B / bank baru tanpa docx sumber**: setelah teks Soalin (struktur di bawah) selesai untuk satu batch, tulis ke `.docx` dengan `docx` (npm, lihat skill `docx`). Bagian 1 (soal MCQ): tiap baris pada spec (soal, tiap opsi beserta `{penjelasan}`-nya, `Kunci:`, `Gambar Penjelasan:`) jadi satu `Paragraph` polos (tanpa bold/heading/formatting lain). Bagian 2 (rusak) dan Bagian 3 (isian), bila ada: masing-masing WAJIB satu `Paragraph` ber-`heading: HeadingLevel.HEADING_2` berisi teks persis "Bagian 2" / "Bagian 3" (bukan teks biasa, bukan bold-manual — harus style Heading asli, ini yang dibaca parser lewat tag `<h1-3>` hasil convert), diikuti satu `Table` sungguhan (`Table`/`TableRow`/`TableCell` dari `docx`) dengan kolom sesuai spec di atas (3 kolom masing-masing). Tanpa Heading asli ini, parser Soalin tidak akan pernah mendeteksi Bagian 3, dan kalau Bagian 2 + Bagian 3 sama-sama ada tanpa heading keduanya bisa ketuker (baris isian ke-parse sebagai soal rusak). Kasus pertama: `create_file` skrip docx-js baru. Batch berikutnya: buka docx yang sudah ada dan tambahkan paragraf/table di akhir `word/document.xml` (unzip → edit → zip, lihat skill `docx`) — jangan generate ulang dari nol.
+- **MODE B / bank baru tanpa docx sumber**: setelah teks Soalin (struktur di bawah) selesai untuk satu batch, tulis ke `.docx` dengan `python scripts/build_soalin_docx.py --questions q.json --out bank.docx` (jawaban benar otomatis di-highlight kuning; tambahkan `--kunci-line` hanya bila butuh format lama). Bagian 1 (soal MCQ): tiap baris pada spec (soal, tiap opsi beserta `{penjelasan}`-nya, `Kunci:`, `Gambar Penjelasan:`) jadi satu `Paragraph` polos (tanpa bold/heading/formatting lain). Bagian 2 (rusak) dan Bagian 3 (isian), bila ada: masing-masing WAJIB satu `Paragraph` ber-`heading: HeadingLevel.HEADING_2` berisi teks persis "Bagian 2" / "Bagian 3" (bukan teks biasa, bukan bold-manual — harus style Heading asli, ini yang dibaca parser lewat tag `<h1-3>` hasil convert), diikuti satu `Table` sungguhan (`Table`/`TableRow`/`TableCell` dari `docx`) dengan kolom sesuai spec di atas (3 kolom masing-masing). Tanpa Heading asli ini, parser Soalin tidak akan pernah mendeteksi Bagian 3, dan kalau Bagian 2 + Bagian 3 sama-sama ada tanpa heading keduanya bisa ketuker (baris isian ke-parse sebagai soal rusak). Kasus pertama: `create_file` skrip docx-js baru. Batch berikutnya: buka docx yang sudah ada dan tambahkan paragraf/table di akhir `word/document.xml` (unzip → edit → zip, lihat skill `docx`) — jangan generate ulang dari nol.
 - **MODE A dengan docx sumber**: ikuti pipeline gambar (`bake`/`sync-pdf` → `dump` → `check --fix` → `audit` → `shuffle`) seperti biasa; hasil akhirnya sudah docx. Kalau sumbernya sudah punya tabel rusak/isian tapi tanpa Heading "Bagian 2"/"Bagian 3" di atasnya (umum kalau bank lama ditulis sebelum aturan ini), sisipkan Heading itu langsung ke `word/document.xml` sebelum tabel yang bersangkutan — jangan biarkan tabel tanpa heading kalau lebih dari satu tabel non-MCQ ada di dokumen.
 - Struktur isi (urutan di dalam docx, tetap sama seperti sebelumnya, sekarang dengan Bagian 3):
 

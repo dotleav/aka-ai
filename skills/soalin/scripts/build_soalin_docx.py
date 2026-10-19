@@ -12,6 +12,8 @@ Question object (see SKILL.md for the full schema):
 Rules enforced:
   - Numbering is kept exactly as given in "no" (no renumbering) unless --renumber is passed.
   - Each option line: "A. teks {penjelasan}". Missing penjelasan -> error (format requires it).
+  - The correct option ("kunci") is marked by YELLOW HIGHLIGHT on its whole option line.
+    No "Kunci:" line is written by default. Pass --kunci-line to also write the old "Kunci: X" line.
   - Image slots: soal images go right after the question text (before A). Penjelasan images go after
     "Gambar Penjelasan:" and before "Sumber:". Images are NEVER embedded, only [GAMBAR: ...] placeholders.
   - Broken questions (broken=true, or missing kunci) go to "Bagian 2" as a real Heading 2 + 3-column table.
@@ -19,8 +21,9 @@ Rules enforced:
 """
 import argparse, json, sys
 from docx import Document
+from docx.enum.text import WD_COLOR_INDEX
 
-def build(qs, out, renumber=False):
+def build(qs, out, renumber=False, kunci_line=False):
     doc = Document()
     doc.styles["Normal"].font.name = "Calibri"
     broken_rows, slots = [], []
@@ -44,8 +47,12 @@ def build(qs, out, renumber=False):
             pj = o.get("penjelasan")
             if not pj:
                 sys.exit(f"No {no} opsi {o['huruf']}: penjelasan opsi kosong (wajib)")
-            doc.add_paragraph(f"{o['huruf']}. {o['teks']} {{{pj}}}")
-        doc.add_paragraph(f"Kunci: {q['kunci']}")
+            p = doc.add_paragraph(f"{o['huruf']}. {o['teks']} {{{pj}}}")
+            if o['huruf'] == q['kunci'] and not kunci_line:
+                for r in p.runs:
+                    r.font.highlight_color = WD_COLOR_INDEX.YELLOW
+        if kunci_line:
+            doc.add_paragraph(f"Kunci: {q['kunci']}")
         if q.get("gambar_penjelasan"):
             doc.add_paragraph(f"Gambar Penjelasan: {q['gambar_penjelasan']}")
         for s in q.get("gambar_penjelasan_slot", []):
@@ -72,5 +79,6 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--questions", required=True); ap.add_argument("--out", required=True)
     ap.add_argument("--renumber", action="store_true")
+    ap.add_argument("--kunci-line", action="store_true", help="tulis baris 'Kunci: X' (format lama) selain highlight")
     a = ap.parse_args()
-    build(json.load(open(a.questions, encoding="utf-8")), a.out, a.renumber)
+    build(json.load(open(a.questions, encoding="utf-8")), a.out, a.renumber, a.kunci_line)

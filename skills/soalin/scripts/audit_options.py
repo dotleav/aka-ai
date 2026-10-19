@@ -30,8 +30,9 @@ ABSOLUTE = re.compile(r"\b(selalu|tidak pernah|semua|seluruh|hanya|pasti|mutlak|
 
 # ── item abstraction: a line (txt) or a paragraph (docx) with get/set text ────
 class Item:
-    def __init__(self, get, set_):
+    def __init__(self, get, set_, hl=None, set_hl=None):
         self.get, self.set = get, set_
+        self.hl, self.set_hl = hl, set_hl   # hl(): paragraf di-highlight? set_hl(bool): atur highlight
 
 
 def load(path):
@@ -47,7 +48,13 @@ def load(path):
                 runs[0].text = t
                 for r in runs[1:]:
                     r.text = ""
-            return Item(lambda: p.text, set_)
+            def hl_get():
+                return any(r.font.highlight_color is not None for r in p.runs)
+            def hl_set(on):
+                from docx.enum.text import WD_COLOR_INDEX
+                for r in p.runs:
+                    r.font.highlight_color = WD_COLOR_INDEX.YELLOW if on else None
+            return Item(lambda: p.text, set_, hl_get, hl_set)
         return doc, [mk(p) for p in doc.paragraphs]
     lines = path.read_text(encoding="utf-8").split("\n")
 
@@ -62,8 +69,12 @@ def parse(items):
     qs, cur, state = [], None, "penj"
 
     def flush():
-        if cur and len(cur["opts"]) == 5 and cur["kunci"]:
-            qs.append(cur)
+        if cur and len(cur["opts"]) == 5:
+            if not cur["kunci"] and cur.get("hl"):
+                # tanpa baris "Kunci:": opsi yang di-highlight adalah kunci
+                cur["kunci"], cur["via_hl"] = (None, cur["hl"]), True
+            if cur["kunci"]:
+                qs.append(cur)
 
     for it in items:
         t = it.get()
@@ -82,6 +93,8 @@ def parse(items):
             cur["penj"], state = t, "penj"
         elif m_opt and state in ("stem", "opt") and not KUNCI.match(t):
             cur["opts"][m_opt.group(2)] = it
+            if it.hl and it.hl():
+                cur["hl"] = m_opt.group(2).upper()  # kalau lebih dari satu, yang terakhir
             state = "opt"
     flush()
     return qs
@@ -194,8 +207,11 @@ def shuffle(qs, seed):
         for L, o in q["opts"].items():
             m = OPT.match(o.get())
             o.set(f"{m.group(1)}{L}{m.group(3)}{new[L]}")
+            if q.get("via_hl") and o.set_hl:
+                o.set_hl(L == target)  # highlight ikut pindah ke jawaban baru
         it, _ = q["kunci"]
-        it.set(KUNCI.sub(lambda m: m.group(1) + target, it.get(), count=1))
+        if it is not None:
+            it.set(KUNCI.sub(lambda m: m.group(1) + target, it.get(), count=1))
         moved += target != old
     print(f"Diacak: {len(plan)} soal aman ({moved} berubah posisi), {len(qs) - len(plan)} dilewati (label gambar / numerik / 'semua benar' / rujuk huruf)")
     return counts
